@@ -24,6 +24,12 @@ const userSchema = new Schema(
 			trim: true,
 			required: true,
 		},
+		bio: String,
+		location: String,
+		website: String,
+		posts: { type: Schema.Types.ObjectId, ref: "Post" },
+		followers: { type: Schema.Types.ObjectId, ref: "Follower" },
+		following: { type: Schema.Types.ObjectId, ref: "Follower" },
 	},
 	{ timestamps: true }
 );
