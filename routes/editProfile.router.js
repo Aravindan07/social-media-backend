@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { editProfile } = require("../controllers/editProfile.controller");
+const { editProfile, fetchProfile } = require("../controllers/editProfile.controller");
 const checkAuth = require("../middlewares/checkAuth");
 
-router.route("/:userId/edit-profile").all(checkAuth).post(editProfile);
+router.route("/:userName/profile").all(checkAuth).get(fetchProfile);
+router.route("/:userId/edit-profile").all(checkAuth).put(editProfile);
 
 module.exports = router;

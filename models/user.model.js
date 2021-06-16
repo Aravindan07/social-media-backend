@@ -28,8 +28,8 @@ const userSchema = new Schema(
 		location: String,
 		website: String,
 		posts: { type: Schema.Types.ObjectId, ref: "Post" },
-		followers: { type: Schema.Types.ObjectId, ref: "Follower" },
-		following: { type: Schema.Types.ObjectId, ref: "Follower" },
+		followers: { type: Number, default: 0 },
+		following: { type: Number, default: 0 },
 	},
 	{ timestamps: true }
 );

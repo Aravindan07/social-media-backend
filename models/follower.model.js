@@ -3,7 +3,8 @@ const Schema = mongoose.Schema;
 
 const followersSchema = new Schema(
 	{
-		users: [{ type: Schema.Types.ObjectId, ref: "User" }],
+		userId: { type: Schema.Types.ObjectId, ref: "User" },
+		followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
 	},
 	{ timestamps: true }
 );

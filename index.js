@@ -6,6 +6,8 @@ const connectDB = require("./db/db.connection");
 const userRoutes = require("./routes/user.router");
 const editProfileRoutes = require("./routes/editProfile.router");
 const postRoutes = require("./routes/post.router");
+const followerRoutes = require("./routes/follower.router");
+const followingRoutes = require("./routes/following.router");
 const handleErrors = require("./middlewares/handleErrors");
 dotenv.config();
 
@@ -17,7 +19,9 @@ connectDB();
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/users", editProfileRoutes);
-app.use("/api/v1/users/", postRoutes);
+app.use("/api/v1/users", postRoutes);
+app.use("/api/v1/users", followerRoutes);
+app.use("/api/v1/users", followingRoutes);
 
 app.use(handleErrors);
 

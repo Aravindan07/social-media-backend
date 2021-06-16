@@ -69,7 +69,9 @@ const loginUser = async (req, res, next) => {
 		if (!validator.isEmail(email)) {
 			throw new BadRequest("Please enter a valid email");
 		}
-		const user = await User.findOne({ email }).select("-__v -createdAt -updatedAt");
+		const user = await User.findOne({ email })
+			.select("-__v -createdAt -updatedAt")
+			.populate("posts");
 		if (!user) {
 			return res.status(404).json({ message: "User does not exist" });
 		}
@@ -93,9 +95,9 @@ const loginUser = async (req, res, next) => {
 
 const loadUser = async (req, res, next) => {
 	try {
-		const user = await User.findById(req.user.id).select(
-			"-password -createdAt -updatedAt -__v"
-		);
+		const user = await User.findById(req.user.id)
+			.select("-password -createdAt -updatedAt -__v")
+			.populate("posts");
 		return res.status(200).json({
 			user,
 		});
@@ -104,4 +106,13 @@ const loadUser = async (req, res, next) => {
 	}
 };
 
-module.exports = { registerUser, loginUser, loadUser };
+const fetchAllUsers = async (req, res, next) => {
+	try {
+		const users = await User.find({}).select("_id fullName userName bio");
+		return res.status(200).json({ users });
+	} catch (error) {
+		next(error);
+	}
+};
+
+module.exports = { registerUser, loginUser, loadUser, fetchAllUsers };
