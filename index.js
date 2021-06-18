@@ -8,6 +8,7 @@ const editProfileRoutes = require("./routes/editProfile.router");
 const postRoutes = require("./routes/post.router");
 const followerRoutes = require("./routes/follower.router");
 const followingRoutes = require("./routes/following.router");
+const notificationRoutes = require("./routes/notification.router");
 const handleErrors = require("./middlewares/handleErrors");
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use("/api/v1/users", editProfileRoutes);
 app.use("/api/v1/users", postRoutes);
 app.use("/api/v1/users", followerRoutes);
 app.use("/api/v1/users", followingRoutes);
+app.use("/api/v1/users", notificationRoutes);
 
 app.use(handleErrors);
 

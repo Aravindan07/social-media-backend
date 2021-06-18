@@ -1,6 +1,7 @@
 const Following = require("../models/following.model");
 const Follower = require("../models/follower.model");
 const User = require("../models/user.model");
+const Notification = require("../models/notification.model");
 
 const getFollowingAndFollowers = async (req, res, next) => {
 	const { userId } = req.params;
@@ -44,13 +45,24 @@ const addToFollowingList = async (req, res, next) => {
 		const followedUser = await User.findById(followingId).select(
 			"-__v -password -createdAt -updatedAt"
 		);
+		const foundNotification = await Notification.findOne({ userId: followingId });
 
 		if (foundFollowing && foundFollower) {
-			console.log("Inside 1st if");
 			foundFollowing.following.push(followingId);
 			user.following = foundFollowing.following.length;
 			foundFollower.followers.push(userId);
 			followedUser.followers = foundFollower.followers.length;
+			if (foundNotification) {
+				foundNotification.notifications.unshift(`${user.fullName} is now following you!`);
+				await foundNotification.save();
+			}
+			if (!foundNotification) {
+				const newNotification = new Notification({
+					userId: followingId,
+					notifications: [`${user.fullName} is now following you!`],
+				});
+				await newNotification.save();
+			}
 			await user.save();
 			await foundFollower.save();
 			await followedUser.save();
@@ -73,7 +85,6 @@ const addToFollowingList = async (req, res, next) => {
 		}
 
 		if (foundFollowing && !foundFollower) {
-			console.log("inside 2nd if");
 			foundFollowing.following.push(followingId);
 			user.following = foundFollowing.following.length;
 			await user.save();
@@ -81,6 +92,17 @@ const addToFollowingList = async (req, res, next) => {
 			followedUser.followers = 1;
 			await followedUser.save();
 			await firstFollowerForUser.save();
+			if (foundNotification) {
+				foundNotification.notifications.unshift(`${user.fullName} is now following you!`);
+				await foundNotification.save();
+			}
+			if (!foundNotification) {
+				const newNotification = new Notification({
+					userId: followingId,
+					notifications: [`${user.fullName} is now following you!`],
+				});
+				await newNotification.save();
+			}
 			let followingList = await foundFollowing.save();
 			followingList = await followingList
 				.populate({
@@ -99,13 +121,27 @@ const addToFollowingList = async (req, res, next) => {
 				.json({ message: "Added to following", following: followingList });
 		}
 		if (!foundFollowing && foundFollower) {
-			const newFollowing = new Following({ userId, following: [followingId] });
+			const newFollowing = new Following({
+				userId,
+				following: [followingId],
+			});
 			user.following = 1;
 			await user.save();
 			foundFollower.followers.push(userId);
 			followedUser.followers = foundFollower.followers.length;
+			if (foundNotification) {
+				foundNotification.notifications.unshift(`${user.fullName} is now following you!`);
+				await foundNotification.save();
+			}
+			if (!foundNotification) {
+				const newNotification = new Notification({
+					userId: followingId,
+					notifications: [`${user.fullName} is now following you!`],
+				});
+				await newNotification.save();
+			}
 			await followedUser.save();
-			let followingList = await foundFollowing.save();
+			let followingList = await newFollowing.save();
 			followingList = await followingList
 				.populate({
 					path: "following",
@@ -122,14 +158,28 @@ const addToFollowingList = async (req, res, next) => {
 				.status(201)
 				.json({ message: "Added to following", following: followingList });
 		}
-		const newFollowing = new Following({ userId, following: [followingId] });
+		const newFollowing = new Following({
+			userId,
+			following: [followingId],
+		});
 		const newFollower = new Follower({ userId: followingId, followers: [userId] });
 		user.following = 1;
 		followedUser.followers = 1;
+		if (foundNotification) {
+			foundNotification.notifications.unshift(`${user.fullName} is now following you!`);
+			await foundNotification.save();
+		}
+		if (!foundNotification) {
+			const newNotification = new Notification({
+				userId: followingId,
+				notifications: [`${user.fullName} is now following you!`],
+			});
+			await newNotification.save();
+		}
 		await user.save();
 		followedUser.save();
 		await newFollower.save();
-		let followingList = await foundFollowing.save();
+		let followingList = await newFollowing.save();
 		followingList = await followingList
 			.populate({
 				path: "following",

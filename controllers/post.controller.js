@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const Post = require("../models/post.model");
 const Following = require("../models/following.model");
+const Notification = require("../models/notification.model");
 const { NotFound } = require("../utils/errors");
 
 const getAllPosts = async (req, res, next) => {
@@ -332,6 +333,9 @@ const likeTweet = async (req, res, next) => {
 				},
 			]);
 
+		const foundNotification = await Notification.findOne({ userId: userPostId });
+		const likedUser = await User.findById(likedUserId).select("fullName");
+
 		if (!foundPost) {
 			throw new NotFound("Post Not found!");
 		}
@@ -342,6 +346,19 @@ const likeTweet = async (req, res, next) => {
 
 		const posts = await foundPost.save();
 		// let posts = await allPosts.save();
+		if (likedUserId !== userPostId) {
+			if (foundNotification) {
+				foundNotification.notifications.unshift(`${likedUser.fullName} liked your post`);
+				await foundNotification.save();
+			}
+			if (!foundNotification) {
+				const newNotification = new Notification({
+					userId: userPostId,
+					notifications: [`${likedUser.fullName} liked your post`],
+				});
+				await newNotification.save();
+			}
+		}
 		return res.status(200).json({ message: "Liked a post", posts });
 	} catch (error) {
 		console.error(error);
@@ -449,6 +466,10 @@ const postComment = async (req, res, next) => {
 			"-__v -createdAt -updatedAt"
 		);
 
+		const foundNotification = await Notification.findOne({ userId: postUserId });
+
+		const commentedUser = await User.findById(commentedUserId).select("fullName");
+
 		if (!foundPost) {
 			throw new NotFound("Post Not found!");
 		}
@@ -458,6 +479,22 @@ const postComment = async (req, res, next) => {
 				? el.comments.push({ users: commentedUserId, comment })
 				: el
 		);
+
+		if (postUserId !== commentedUserId) {
+			if (foundNotification) {
+				foundNotification.notifications.unshift(
+					`${commentedUser.fullName} commented on your post`
+				);
+				await foundNotification.save();
+			}
+			if (!foundNotification) {
+				const newNotification = new Notification({
+					userId: postUserId,
+					notifications: [`${commentedUser.fullName} commented on your post`],
+				});
+				await newNotification.save();
+			}
+		}
 
 		let posts = await foundPost.save();
 		posts = await posts
