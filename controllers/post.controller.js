@@ -74,67 +74,128 @@ const getAllPosts = async (req, res, next) => {
 	}
 };
 
-// const getAllPostsFromFollowing = async (req, res, next) => {
-// 	const { userId } = req.params;
-// 	try {
-// 		const foundFollowing = await Following.findOne({ userId })
-// 			.select("-__v -password -createdAt -updatedAt")
-// 			.populate({
-// 				path: "following",
-// 				model: "User",
-// 				select: { fullName: 1, userName: 1, posts: 1 },
-// 				populate: [
-// 					{
-// 						path: "posts",
-// 						populate: [
-// 							{
-// 								path: "posts.likes",
-// 								model: "User",
-// 								select: {
-// 									createdAt: 0,
-// 									updatedAt: 0,
-// 									__v: 0,
-// 									posts: 0,
-// 									password: 0,
-// 									email: 0,
-// 								},
-// 							},
-// 							{
-// 								path: "posts.comments.users",
-// 								model: "User",
-// 								select: {
-// 									createdAt: 0,
-// 									updatedAt: 0,
-// 									__v: 0,
-// 									posts: 0,
-// 									password: 0,
-// 									email: 0,
-// 								},
-// 							},
-// 							{
-// 								path: "posts.comments.likes",
-// 								model: "User",
-// 								select: {
-// 									createdAt: 0,
-// 									updatedAt: 0,
-// 									__v: 0,
-// 									posts: 0,
-// 									password: 0,
-// 									email: 0,
-// 								},
-// 							},
-// 						],
-// 					},
-// 				],
-// 			});
+const getAllPostsFromFollowing = async (req, res, next) => {
+	const { userId } = req.params;
+	try {
+		const foundFollowing = await Following.findOne({ userId })
+			.select("-__v -password -createdAt -updatedAt")
+			.populate({
+				path: "following",
+				model: "User",
+				select: { fullName: 1, userName: 1, posts: 1 },
+				populate: [
+					{
+						path: "posts",
+						populate: [
+							{
+								path: "posts.likes",
+								model: "User",
+								select: {
+									_id: 1,
+									fullName: 1,
+									userName: 1,
+									bio: 1,
+								},
+							},
+							{
+								path: "posts.comments.users",
+								model: "User",
+								select: {
+									_id: 1,
+									fullName: 1,
+									userName: 1,
+									bio: 1,
+								},
+							},
+							{
+								path: "posts.comments.likes",
+								model: "User",
+								select: {
+									_id: 1,
+									fullName: 1,
+									userName: 1,
+									bio: 1,
+								},
+							},
+						],
+					},
+				],
+			});
+		console.log("foundFollowing", foundFollowing);
 
-// 		console.log("foundFollowing", foundFollowing);
-// 		return res.status(200).json({ posts: foundFollowing });
-// 	} catch (error) {
-// 		console.error(error);
-// 		next(error);
-// 	}
-// };
+		const posts = await Post.find({})
+			.select("-__v -createdAt -updatedAt")
+			.populate([
+				{
+					path: "userId",
+					model: "User",
+					select: {
+						_id: 1,
+						fullName: 1,
+						userName: 1,
+					},
+				},
+				{
+					path: "posts.likes",
+					model: "User",
+					select: {
+						createdAt: 0,
+						updatedAt: 0,
+						__v: 0,
+						posts: 0,
+						password: 0,
+						email: 0,
+						followers: 0,
+						following: 0,
+						location: 0,
+						website: 0,
+					},
+				},
+				{
+					path: "posts.comments.users",
+					model: "User",
+					select: {
+						createdAt: 0,
+						updatedAt: 0,
+						__v: 0,
+						posts: 0,
+						password: 0,
+						email: 0,
+						followers: 0,
+						following: 0,
+						location: 0,
+						website: 0,
+					},
+				},
+				{
+					path: "posts.comments.likes",
+					model: "User",
+					select: {
+						createdAt: 0,
+						updatedAt: 0,
+						__v: 0,
+						posts: 0,
+						password: 0,
+						email: 0,
+						followers: 0,
+						following: 0,
+						location: 0,
+						website: 0,
+					},
+				},
+			]);
+
+		if (!foundFollowing || foundFollowing.following.filter((el) => el.posts).length === 0) {
+			console.log("inside 1st if");
+			return res.status(200).json({ posts });
+		}
+		console.log("Outside if");
+		return res.status(200).json({ posts: foundFollowing });
+	} catch (error) {
+		console.error(error);
+		next(error);
+	}
+};
 
 const getIndividualPost = async (req, res, next) => {
 	const { userId, postId } = req.params;
@@ -673,4 +734,5 @@ module.exports = {
 	likeComment,
 	getIndividualPost,
 	getAllPosts,
+	getAllPostsFromFollowing,
 };

@@ -13,6 +13,7 @@ const {
 const checkAuth = require("../middlewares/checkAuth");
 
 router.route("/:userId/get-posts").all(checkAuth).get(getAllPosts);
+router.route("/:userId/get-posts-from-following").all(checkAuth).get(getAllPostsFromFollowing);
 router.route("/:userId/:postId/get-post").all(checkAuth).get(getIndividualPost);
 router.route("/:userId/add-post").all(checkAuth).post(postTweet);
 router.route("/:userId/:postId/like-post").all(checkAuth).post(likeTweet);
